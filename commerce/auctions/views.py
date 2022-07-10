@@ -1,11 +1,14 @@
+from unicodedata import category
+from attr import attrs
+from django import forms
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
+from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.urls import reverse
 
-from .models import User
-
+from .models import User, Auction
 
 def index(request):
     return render(request, "auctions/index.html")
@@ -61,3 +64,53 @@ def register(request):
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "auctions/register.html")
+
+CATEGORIES = [
+            "Jewelry & Watches", "Furniture, Appliances & Equipment", "Video Games, Consoles & Accessories",
+            "Flowers, Greetings & Misc Gifts", "Event Tickets", "Computer Software", "Home & Garden",
+            "Music, Movies & videos", "Apparel & Accessories", "Total Digital Commerce", "Office Supplies",
+            "Consumer Packaged Goods", "Sport & Fitness", "Toys & Hobbies", "Consumer Electronics",
+            "Digital Content & Subscriptions", "Computers / Peripherals / PDAs", "Books & Magazines"
+        ]
+
+def createList(request):
+    if request.method == "POST":
+        title = request.POST["title"]
+        description = request.POST["description"]
+        image = request.POST["url"]
+        startPrice = request.POST["price"]
+        category = request.POST["categories"]
+        startBid = request.POST["startBid"]
+        endBid = request.POST["endBid"]
+
+        if not title or not description or not image or not startPrice or not startBid or not endBid:
+            return render(request, "auctions/createList.html")
+
+        if category == "Categories":
+            return render(request, "auctions/createList.html", {
+                "message": "Select a Category",
+                "CATEGORIES": CATEGORIES,
+                "title": title,
+                "description": description,
+                "image": image,
+                "startPrice": startPrice,
+                "category": category,
+                "startBid": startBid,
+                "endBid": endBid
+            })
+        
+        auction = Auction.objects.create(
+            title=title,
+            description=description,
+            image=image,
+            price=startPrice,
+            category=category,
+            startBid=startBid,
+            endBid=endBid
+        )
+        auction.save()
+        return HttpResponseRedirect(reverse("createList"))
+
+    return render(request, "auctions/createList.html", {
+        "CATEGORIES": CATEGORIES
+    })

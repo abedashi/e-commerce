@@ -1,0 +1,53 @@
+{% extends "auctions/layout.html" %}
+
+{% block title %}
+    Create List
+{% endblock %}
+
+{% block body %}
+    <h2>Create List</h2>
+    
+    <form action="{% url 'createList' %}" method="post">
+        <div class="container-create-form">
+            {% csrf_token %}
+            <div class="left">
+                <div class="mb-3">
+                    <input type="text" class="form-control" value="{{ title }}" name="title" placeholder="Title" autocomplete="off" autofocus required>
+                </div>
+                <div class="mb-3">
+                    <input type="text" class="form-control" value="{{ description }}" name="description" placeholder="description" autocomplete="off" required>
+                </div>
+                <div class="mb-3">
+                    <input type="url" class="form-control" value="image" name="url" placeholder="Image URL" autocomplete="off" required>
+                </div>
+            </div>
+            <div class="right">
+                <div class="mb-3">
+                    <input type="number" class="form-control" value="startPrice" name="price" placeholder="Starting Price" autocomplete="off" required>
+                </div>
+                <div class="mb-3">
+                    <select class="form-control" name="categories" required>
+                        <option value="Categories">Categories</option>
+                        {% for category in CATEGORIES %}
+                            <option value="{{ category }}">{{ category }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="mb-3">
+                    <p style="color: red">{% if message %} {{ message }} {% endif %}</p>
+                </div>
+            </div>
+        </div>
+        <div>
+            From:
+            <div class="mb-3">
+                <input type="datetime-local" class="form-control" value="{{ startBid }}" name="startBid" required>
+            </div>
+            To:
+            <div class="mb-3">
+                <input type="datetime-local" class="form-control" value="{{ endBid }}" name="endBid" required>
+            </div>
+        </div>
+        <input type="submit" class="btn btn-primary" value="Create List">
+    </form>
+{% endblock %}
