@@ -1,0 +1,17 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <form action="{% url 'categories' %}" method="post">
+        {% csrf_token %}
+        <label for="browser"><strong>Choose your Category from the list:{% if message %} <span style="color: red;">{{ message }}</span> {% endif %}</strong></label>
+        <div class="mb-3">
+            <input class="form-control" list="allCategories" placeholder="Select Categories" name="allCategories" id="browser" autofocus>
+        </div>
+        <datalist id="allCategories">
+            {% for category in CATEGORIES %}
+                <option value="{{ category }}">{{ category }}</option>
+            {% endfor %}
+        </datalist>
+        <input type="submit" class="btn btn-primary" value="Submit">
+    </form>
+{% endblock %}

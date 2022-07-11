@@ -74,7 +74,7 @@ CATEGORIES = [
             "Flowers, Greetings & Misc Gifts", "Event Tickets", "Computer Software", "Home & Garden",
             "Music, Movies & videos", "Apparel & Accessories", "Total Digital Commerce", "Office Supplies",
             "Consumer Packaged Goods", "Sport & Fitness", "Toys & Hobbies", "Consumer Electronics",
-            "Digital Content & Subscriptions", "Computers / Peripherals / PDAs", "Books & Magazines"
+            "Digital Content & Subscriptions", "Computers / Peripherals / PDAs", "Books & Magazines", "Others"
         ]
 
 @login_required(redirect_field_name='index')
@@ -118,5 +118,20 @@ def createList(request):
         return HttpResponseRedirect(reverse("createList"))
 
     return render(request, "auctions/createList.html", {
+        "CATEGORIES": CATEGORIES
+    })
+
+def categories(request, category_name):
+    if request.method == "POST":
+        category = request.POST["allCategories"]
+        if not category:
+            return render(request, "auctions/categories.html", {
+                "message": "SELECT CATEGORY",
+                "CATEGORIES": CATEGORIES
+            })
+        Auction.objects.filter(category=category)
+        return HttpResponseRedirect(reverse("index"))
+
+    return render(request, "auctions/categories.html", {
         "CATEGORIES": CATEGORIES
     })

@@ -10,7 +10,7 @@ class Auction(models.Model):
     description = models.CharField(max_length=1000)
     category = models.CharField(max_length=40)
     created_at = models.DateTimeField(default=timezone.now)
-    image = models.URLField(max_length=200)
+    image = models.URLField(max_length=400)
     price = models.FloatField()
     startBid = models.DateTimeField(auto_now=False, auto_now_add=False)
     endBid = models.DateTimeField(auto_now=False, auto_now_add=False)

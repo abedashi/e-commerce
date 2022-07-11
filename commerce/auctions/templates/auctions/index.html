@@ -4,24 +4,32 @@
     <h2>Active Listings</h2>
 
     {% for listing in Listings %}
-    <div class="mb-3" id="container-active-listing">
-        <div id="img">
-            <a href="{{ listing.image }}" target="_blank"><img src="{{ listing.image }}" class="responsive"></a>
+        <div class="mb-3" id="container-active-listing">
+            <div id="img">
+                <a href="{{ listing.image }}" target="_blank"><img src="{{ listing.image }}" class="responsive"></a>
+            </div>
+            <div class="mb-3" id="details">
+                <div>
+                    <h4>{{ listing.title }}</h3>
+                </div>
+                <div>
+                    <h5>Price: ${{ listing.price }}</h4>
+                </div>
+                <div>
+                    <h6>{{ listing.description }}</h6>
+                </div>
+                <div>
+                    Created {{ listing.created_at }}
+                </div>
+                <div style="margin-top: 5px; display: flex; gap: 5px;">
+                    {% if user.is_authenticated %}
+                        <button class="btn btn-secondary">View</button>
+                        <button class="btn btn-primary" style="display: flex; align-items: center;"><ion-icon style="font-size: 20px;" name="add-outline"></ion-icon>Add to Watchlist</button>
+                        <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+                        <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+                    {% endif %}
+                </div>
+            </div>
         </div>
-        <div class="mb-3" id="details">
-            <div>
-                <h4>{{ listing.title }}</h3>
-            </div>
-            <div>
-                <h5>Price: ${{ listing.price }}</h4>
-            </div>
-            <div>
-                <h6>{{ listing.description }}</h6>
-            </div>
-            <div>
-                Created {{ listing.created_at }}
-            </div>
-        </div>
-    </div>
     {% endfor %}
 {% endblock %}
