@@ -14,6 +14,7 @@ class Auction(models.Model):
     price = models.FloatField()
     startBid = models.DateTimeField(auto_now=False, auto_now_add=False)
     endBid = models.DateTimeField(auto_now=False, auto_now_add=False)
+    # user_id = models.ForeignKey(User, on_delete=models.CASCADE, related_name="buyer")
 
     def __str__(self):
         return f"{self.title}, {self.description}, {self.category}, {self.created_at}, {self.image}, ${self.price}, {self.startBid}, {self.endBid}"

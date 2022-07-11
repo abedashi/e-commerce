@@ -3,5 +3,25 @@
 {% block body %}
     <h2>Active Listings</h2>
 
-    TODO
+    {% for listing in Listings %}
+    <div class="mb-3" id="container-active-listing">
+        <div id="img">
+            <a href="{{ listing.image }}" target="_blank"><img src="{{ listing.image }}" class="responsive"></a>
+        </div>
+        <div class="mb-3" id="details">
+            <div>
+                <h4>{{ listing.title }}</h3>
+            </div>
+            <div>
+                <h5>Price: ${{ listing.price }}</h4>
+            </div>
+            <div>
+                <h6>{{ listing.description }}</h6>
+            </div>
+            <div>
+                Created {{ listing.created_at }}
+            </div>
+        </div>
+    </div>
+    {% endfor %}
 {% endblock %}

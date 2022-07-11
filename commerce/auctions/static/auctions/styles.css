@@ -15,3 +15,27 @@ body {
     flex-direction: column;
     flex: 1;
 }
+
+#container-active-listing {
+    display: flex;
+    border-radius: 5px;
+    border: 1px solid rgb(212, 212, 212);
+}
+#img {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    justify-content: center;
+}
+#details {
+    display: flex;
+    flex-direction: column;
+    flex: 2;
+    margin: 15px;
+}
+.responsive {
+    width: auto;
+    max-width: 200;
+    height: auto;
+    max-height: 200px;
+}

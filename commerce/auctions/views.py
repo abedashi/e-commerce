@@ -10,8 +10,11 @@ from django.urls import reverse
 
 from .models import User, Auction
 
+# @login_required
 def index(request):
-    return render(request, "auctions/index.html")
+    return render(request, "auctions/index.html", {
+        "Listings": Auction.objects.all()
+    })
 
 
 def login_view(request):
@@ -65,6 +68,7 @@ def register(request):
     else:
         return render(request, "auctions/register.html")
 
+# Categories List Fields
 CATEGORIES = [
             "Jewelry & Watches", "Furniture, Appliances & Equipment", "Video Games, Consoles & Accessories",
             "Flowers, Greetings & Misc Gifts", "Event Tickets", "Computer Software", "Home & Garden",
@@ -73,8 +77,11 @@ CATEGORIES = [
             "Digital Content & Subscriptions", "Computers / Peripherals / PDAs", "Books & Magazines"
         ]
 
+@login_required(redirect_field_name='index')
 def createList(request):
     if request.method == "POST":
+
+        # Attempt Creating Auction
         title = request.POST["title"]
         description = request.POST["description"]
         image = request.POST["url"]
@@ -83,10 +90,8 @@ def createList(request):
         startBid = request.POST["startBid"]
         endBid = request.POST["endBid"]
 
-        if not title or not description or not image or not startPrice or not startBid or not endBid:
-            return render(request, "auctions/createList.html")
-
-        if category == "Categories":
+        # Check for category if selected or gives a message and more security
+        if not title or not description or not image or not startPrice or category == "Categories" or not startBid or not endBid:
             return render(request, "auctions/createList.html", {
                 "message": "Select a Category",
                 "CATEGORIES": CATEGORIES,
@@ -99,6 +104,7 @@ def createList(request):
                 "endBid": endBid
             })
         
+        # Insert data that selected from the user to the database class Auction
         auction = Auction.objects.create(
             title=title,
             description=description,
