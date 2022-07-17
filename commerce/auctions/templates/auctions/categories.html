@@ -3,15 +3,14 @@
 {% block body %}
     <form action="{% url 'categories' %}" method="post">
         {% csrf_token %}
-        <label for="browser"><strong>Choose your Category from the list:{% if message %} <span style="color: red;">{{ message }}</span> {% endif %}</strong></label>
         <div class="mb-3">
-            <input class="form-control" list="allCategories" placeholder="Select Categories" name="allCategories" id="browser" autofocus>
+            <select class="form-control" name="allCategories" {% if message %}autofocus{% endif %} required>
+                <option value="Categories">Categories</option>
+                {% for category in CATEGORIES %}
+                    <option value="{{ category.id }}">{{ category }}</option>
+                {% endfor %}
+            </select>
         </div>
-        <datalist id="allCategories">
-            {% for category in CATEGORIES %}
-                <option value="{{ category }}">{{ category }}</option>
-            {% endfor %}
-        </datalist>
         <input type="submit" class="btn btn-primary" value="Submit">
     </form>
 {% endblock %}

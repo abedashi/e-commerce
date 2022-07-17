@@ -1,14 +1,13 @@
-from unicodedata import category
-from attr import attrs
-from django import forms
+from datetime import datetime, timezone
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.urls import reverse
+from django.contrib import messages
 
-from .models import User, Auction
+from .models import User, Auction, Categories
 
 # @login_required
 def index(request):
@@ -69,13 +68,13 @@ def register(request):
         return render(request, "auctions/register.html")
 
 # Categories List Fields
-CATEGORIES = [
-            "Jewelry & Watches", "Furniture, Appliances & Equipment", "Video Games, Consoles & Accessories",
-            "Flowers, Greetings & Misc Gifts", "Event Tickets", "Computer Software", "Home & Garden",
-            "Music, Movies & videos", "Apparel & Accessories", "Total Digital Commerce", "Office Supplies",
-            "Consumer Packaged Goods", "Sport & Fitness", "Toys & Hobbies", "Consumer Electronics",
-            "Digital Content & Subscriptions", "Computers / Peripherals / PDAs", "Books & Magazines", "Others"
-        ]
+# CATEGORIES = [
+#             "Jewelry & Watches", "Furniture, Appliances & Equipment", "Video Games, Consoles & Accessories",
+#             "Flowers, Greetings & Misc Gifts", "Event Tickets", "Computer Software", "Home & Garden",
+#             "Music, Movies & videos", "Apparel & Accessories", "Total Digital Commerce", "Office Supplies",
+#             "Consumer Packaged Goods", "Sport & Fitness", "Toys & Hobbies", "Consumer Electronics",
+#             "Digital Content & Subscriptions", "Computers / Peripherals / PDAs", "Books & Magazines", "Others"
+#         ]
 
 @login_required(redirect_field_name='index')
 def createList(request):
@@ -94,7 +93,7 @@ def createList(request):
         if not title or not description or not image or not startPrice or category == "Categories" or not startBid or not endBid:
             return render(request, "auctions/createList.html", {
                 "message": "Select a Category",
-                "CATEGORIES": CATEGORIES,
+                "CATEGORIES": Categories.objects.all(),
                 "title": title,
                 "description": description,
                 "image": image,
@@ -105,33 +104,50 @@ def createList(request):
             })
         
         # Insert data that selected from the user to the database class Auction
-        auction = Auction.objects.create(
-            title=title,
-            description=description,
-            image=image,
-            price=startPrice,
-            category=category,
-            startBid=startBid,
-            endBid=endBid
-        )
-        auction.save()
-        return HttpResponseRedirect(reverse("createList"))
+        try:
+            auction = Auction.objects.create(
+                title=title,
+                description=description,
+                image=image,
+                price=startPrice,
+                startBid=startBid,
+                endBid=endBid,
+                category_id=Categories.objects.get(categories=category)
+            )
+            auction.save()
+            messages.success(request, 'Auction added to the list Successfully.')
+            return HttpResponseRedirect(reverse("createList"))
+        except Exception as e:
+            messages.warning(request, 'Auction Failed to the list Successfully.')
 
     return render(request, "auctions/createList.html", {
-        "CATEGORIES": CATEGORIES
+        "CATEGORIES": Categories.objects.all()
     })
 
-def categories(request, category_name):
+def categories(request):
     if request.method == "POST":
-        category = request.POST["allCategories"]
-        if not category:
+        category_id = int(request.POST["allCategories"])
+        if not category_id:
             return render(request, "auctions/categories.html", {
                 "message": "SELECT CATEGORY",
-                "CATEGORIES": CATEGORIES
+                "CATEGORIES": Categories.objects.all()
             })
-        Auction.objects.filter(category=category)
-        return HttpResponseRedirect(reverse("index"))
+        categoryone = Auction.objects.filter(category_id=category_id)
+        return render(request, "auctions/category.html", {
+            "Categoryone": categoryone
+        })
 
     return render(request, "auctions/categories.html", {
-        "CATEGORIES": CATEGORIES
+        "CATEGORIES": Categories.objects.all()
+    })
+
+def watchList(request):
+    return render(request, "auctions/watchList.html")
+
+def addWatchList(request, list_id):
+    return render(request, "auctions/.html")
+
+def view(request, list_id):
+    return render(request, "auctions/view.html", {
+        "listing": Auction.objects.get(pk=list_id)
     })

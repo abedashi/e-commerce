@@ -6,6 +6,13 @@
 
 {% block body %}
     <h2>Create List</h2>
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-dismissible alert-success">
+                <strong>{{message}}</strong>
+            </div>
+        {% endfor %}
+    {% endif %}
     
     <form action="{% url 'createList' %}" method="post">
         <div class="container-create-form">
@@ -29,7 +36,7 @@
                     <select class="form-control" name="categories" {% if message %}autofocus{% endif %} required>
                         <option value="Categories">Categories</option>
                         {% for category in CATEGORIES %}
-                            <option value="{{ category }}">{{ category }}</option>
+                            <option value="{{ category.categories }}">{{ category }}</option>
                         {% endfor %}
                     </select>
                 </div>

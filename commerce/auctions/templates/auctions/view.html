@@ -1,0 +1,20 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <h1>Listing: {{ listing.title }}</h1>
+    <a href="{{ listing.image }}" target="_blank"><img src="{{ listing.image }}" height="400"></a>
+    <p>{{ listing.description }}</p>
+    <h2>${{ listing.price }}</h2>
+    <p>0 bid(s) so far. Your bid is the current bid.</p>
+    <form>
+        <div class="mb-3">
+            <input type="text" class="form-control" name="bid" placeholder="Bid">
+        </div>
+        <input type="submit" class="btn btn-primary">
+    </form>
+    <h4>Details</h4>
+    <ul>
+        <li>Listed by: user</li>
+        <li>Category: {{ listing.category_id }}</li>
+    </ul>
+{% endblock %}

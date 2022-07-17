@@ -2,29 +2,29 @@
 
 {% block body %}
     <h2>Active Listings</h2>
-    
-    {% for listing in Listings %}
+
+    {% for category in Categoryone %}
         <div class="mb-3" id="container-active-listing">
             <div id="img">
-                <a href="{{ listing.image }}" target="_blank"><img src="{{ listing.image }}" class="responsive"></a>
+                <a href="{{ category.image }}" target="_blank"><img src="{{ category.image }}" class="responsive"></a>
             </div>
             <div class="mb-3" id="details">
                 <div>
-                    <h4>{{ listing.title }}</h3>
+                    <h4>{{ category.title }}</h3>
                 </div>
                 <div>
-                    <h5>Price: ${{ listing.price }}</h4>
+                    <h5>Price: ${{ category.price }}</h4>
                 </div>
                 <div>
-                    <h6>{{ listing.description }}</h6>
+                    <h6>{{ category.description }}</h6>
                 </div>
                 <div>
-                    Created {{ listing.created_at }}
+                    Created {{ category.created_at }}
                 </div>
                 <div style="margin-top: 5px; display: flex; gap: 5px;">
                     {% if user.is_authenticated %}
-                        <a href="{% url 'view' listing.id %}" class="btn btn-secondary">View</a>
-                        <form action="{% url 'addWatchList' listing.id %}" method="post">
+                        <button class="btn btn-secondary">View</button>
+                        <form action="{% url 'watchList' %}">
                             <button class="btn btn-primary" style="display: flex; align-items: center;"><ion-icon style="font-size: 20px;" name="add-outline"></ion-icon>Add to Watchlist</button>
                         </form>
                         <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
