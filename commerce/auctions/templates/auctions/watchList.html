@@ -1,9 +1,9 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-    <h2>Active Listings</h2>
+    <h2>WatchList</h2>
 
-    {% for listing in Listings %}
+    {% for listing in watchList %}
         <div class="mb-3" id="container-active-listing">
             <div id="img">
                 <a href="{{ listing.image }}" target="_blank"><img src="{{ listing.image }}" class="responsive"></a>
@@ -23,7 +23,7 @@
                 </div>
                 <div style="margin-top: 5px; display: flex; gap: 5px;">
                     <form>
-                        <button class="btn btn-secondary">View</button>
+                        <a href="{% url 'viewWatchList' listing.id %}" class="btn btn-secondary">View</a>
                     </form>
                 </div>
             </div>

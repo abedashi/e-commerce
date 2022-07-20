@@ -1,4 +1,5 @@
 from datetime import datetime, timezone
+from turtle import title
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
@@ -7,7 +8,7 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.contrib import messages
 
-from .models import User, Auction, Categories
+from .models import User, Auction, Categories, WatchList
 
 # @login_required
 def index(request):
@@ -23,6 +24,11 @@ def login_view(request):
         username = request.POST["username"]
         password = request.POST["password"]
         user = authenticate(request, username=username, password=password)
+
+        # userSession = User.objects.get(username=username, password=password)
+        # userID = userSession.id
+        # if "userID" not in request.session:
+        #     request.session["userID"] = userID
 
         # Check if authentication successful
         if user is not None:
@@ -104,21 +110,22 @@ def createList(request):
             })
         
         # Insert data that selected from the user to the database class Auction
-        try:
-            auction = Auction.objects.create(
-                title=title,
-                description=description,
-                image=image,
-                price=startPrice,
-                startBid=startBid,
-                endBid=endBid,
-                category_id=Categories.objects.get(categories=category)
-            )
-            auction.save()
-            messages.success(request, 'Auction added to the list Successfully.')
-            return HttpResponseRedirect(reverse("createList"))
-        except Exception as e:
-            messages.warning(request, 'Auction Failed to the list Successfully.')
+        # try:
+        auction = Auction.objects.create(
+            title=title,
+            description=description,
+            image=image,
+            price=startPrice,
+            startBid=startBid,
+            endBid=endBid,
+            category_id=Categories.objects.get(categories=category),
+            userID=User.objects.get(id=request.user.id)
+        )
+        auction.save()
+        messages.success(request, 'Auction added to the list Successfully.')
+        return HttpResponseRedirect(reverse("createList"))
+        # except Exception as e:
+        #     messages.warning(request, 'Auction Failed to the list Successfully.')
 
     return render(request, "auctions/createList.html", {
         "CATEGORIES": Categories.objects.all()
@@ -142,10 +149,42 @@ def categories(request):
     })
 
 def watchList(request):
-    return render(request, "auctions/watchList.html")
+    return render(request, "auctions/watchList.html", {
+        "watchList": WatchList.objects.filter(userID=request.user.id)
+    })
+
+def viewWatchList(request, list_id):
+    return render(request, "auctions/viewWatchList.html", {
+        "listing": WatchList.objects.get(pk=list_id, userID=request.user.id)
+    })
 
 def addWatchList(request, list_id):
-    return render(request, "auctions/.html")
+    if request.method == "POST":
+        watchList = WatchList.objects.filter(userID=request.user.id)
+        if WatchList.objects.filter(auctionID=list_id, userID=request.user.id).first() in watchList:
+            messages.warning(request, 'WARNING: This Auction Already in WatchList!')
+            return HttpResponseRedirect(reverse("index"))
+
+        auction = Auction.objects.get(pk=list_id)
+        watch = WatchList.objects.create(
+            title=auction.title,
+            description=auction.description,
+            price=auction.price,
+            image=auction.image,
+            created_at=auction.created_at,
+            startBid=auction.startBid,
+            endBid=auction.endBid,
+            category_id=Categories.objects.get(categories=auction.category_id),
+            auctionID=Auction.objects.get(pk=list_id),
+            userID=User.objects.get(pk=request.user.id)
+        )
+        watch.save()
+        # messages.warning('Auction added to WatchList Successfully.')
+        return HttpResponseRedirect(reverse("index"))
+
+    return render(request, "auctions/layout.html", {
+        "count": WatchList.objects.filter(userID=request.user.id).count()
+    })
 
 def view(request, list_id):
     return render(request, "auctions/view.html", {

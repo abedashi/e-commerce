@@ -39,3 +39,6 @@ body {
     height: auto;
     max-height: 200px;
 }
+.atag:hover {
+    color: red;
+}

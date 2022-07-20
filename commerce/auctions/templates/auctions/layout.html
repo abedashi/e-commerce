@@ -11,7 +11,7 @@
         <h1>Auctions</h1>
         <div>
             {% if user.is_authenticated %}
-                Signed in as <strong>{{ user.username }}</strong>.
+                Signed in as <strong>{{ user.username }}</strong>. {%if user.is_superuser %}<a href="/admin/" class="atag"><strong style="color: red;"><i>ADMIN</i></strong></a>{% endif %}
             {% else %}
                 Not signed in.
             {% endif %}
@@ -25,7 +25,7 @@
                     <a class="nav-link" href="{% url 'categories' %}">Categories</a>
                 </li>
                 <li>
-                    <a class="nav-link" href="{% url 'watchList' %}">Watchlist <span style="border: 1px solid gray; padding-left: 3px; padding-right: 3px; background-color: gray; color: white; border-radius: 5px;">0</span></a>
+                    <a class="nav-link" href="{% url 'watchList' %}">WatchList <span style="border: 1px solid gray; padding-left: 3px; padding-right: 3px; background-color: gray; color: white; border-radius: 5px;">2</span></a>
                 </li>
                 <li>
                     <a class="nav-link" href="{% url 'createList' %}">Create Listing</a>
