@@ -1,6 +1,34 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
+</div>
+<ul class="nav">
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'index' %}">Active Listings</a>
+    </li>
+    {% if user.is_authenticated %}
+        <li>
+            <a class="nav-link" href="{% url 'categories' %}">Categories</a>
+        </li>
+        <li>
+            <a class="nav-link" href="{% url 'watchList' %}">WatchList {% if CountWatchList > 0 %}<span style="border: 1px solid gray; padding-left: 3px; padding-right: 3px; background-color: gray; color: white; border-radius: 5px;">{{ CountWatchList }}</span>{% endif %}</a>
+        </li>
+        <li>
+            <a class="nav-link" href="{% url 'createList' %}">Create Listing</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
+        </li>
+    {% else %}
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'login' %}">Log In</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'register' %}">Register</a>
+        </li>
+    {% endif %}
+</ul>
+<hr>
     <h2>Active Listings</h2>
 
     {% if not Categoryone %}
@@ -28,9 +56,10 @@
                 </div>
                 <div style="margin-top: 5px; display: flex; gap: 5px;">
                     {% if user.is_authenticated %}
-                        <button class="btn btn-secondary">View</button>
-                        <form action="{% url 'watchList' %}">
-                            <button class="btn btn-primary" style="display: flex; align-items: center;"><ion-icon style="font-size: 20px;" name="add-outline"></ion-icon>Add to Watchlist</button>
+                        <a href="{% url 'view' category.id %}" class="btn btn-secondary">View</a>
+                        <form action="{% url 'addWatchList' category.id %}" method="post">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-primary" style="display: flex; align-items: center;"><ion-icon name="add-outline" style="font-size: 20px;"></ion-icon>Add to WatchList</button>
                         </form>
                         <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
                         <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>

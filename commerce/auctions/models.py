@@ -38,5 +38,11 @@ class WatchList(models.Model):
     category_id = models.ForeignKey(Categories, on_delete=models.CASCADE, null=True)
     auctionID = models.ForeignKey(Auction, on_delete=models.CASCADE, null=True)
 
+class Bid(models.Model):
+    price = models.FloatField()
+    userID = models.ForeignKey(User, on_delete=models.CASCADE)
+    auctionID = models.ForeignKey(Auction, on_delete=models.CASCADE)
+    # watchListID = models.ForeignKey(WatchList, on_delete=models.CASCADE)
+
     def __str__(self):
-        return f"{self.id}, {self.category_id}, {self.userID}, {self.auctionID}"
+        return f"{self.id}, {self.userID}, {self.auctionID}"

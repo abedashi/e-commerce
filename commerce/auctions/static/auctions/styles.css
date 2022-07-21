@@ -42,3 +42,11 @@ body {
 .atag:hover {
     color: red;
 }
+.delete {
+    display: flex;
+    justify-content: space-between;
+}
+.deleteIcon {
+    font-size: x-large;
+    color: red;
+}
