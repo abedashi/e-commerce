@@ -9,11 +9,10 @@ from django.contrib import messages
 
 from .models import User, Auction, Categories, WatchList, Bid, Comment
 
-# @login_required
 def index(request):
     return render(request, "auctions/index.html", {
         "Listings": Auction.objects.all().order_by("id")[::-1],
-        "Limit5": Auction.objects.all().order_by("id")[::-1][:4],
+        "Limit3": Auction.objects.all().order_by("id")[::-1][:3],
         "CountWatchList": WatchList.objects.filter(userID=request.user.id).count()
     })
 
@@ -37,6 +36,7 @@ def login_view(request):
     else:
         return render(request, "auctions/login.html")
 
+@login_required(login_url='login')
 def logout_view(request):
     logout(request)
     return HttpResponseRedirect(reverse("index"))
@@ -68,7 +68,7 @@ def register(request):
     else:
         return render(request, "auctions/register.html")
 
-@login_required(redirect_field_name='index')
+@login_required(login_url='login')
 def createList(request):
     if request.method == "POST":
 
@@ -82,9 +82,10 @@ def createList(request):
         endBid = request.POST["endBid"]
 
         # Check for category if selected or gives a message and more security
-        if not title or not description or not image or not startPrice or category == "Categories" or not startBid or not endBid:
+        if not title or not description or not image or not startPrice or category == "Categories" or not startBid or not endBid or startBid <= str(datetime.now()) or endBid <= str(datetime.now()) or startBid <= endBid:
             return render(request, "auctions/createList.html", {
                 "message": "Select a Category",
+                "dateerror": "date error",
                 "CATEGORIES": Categories.objects.all(),
                 "title": title,
                 "description": description,
@@ -96,6 +97,10 @@ def createList(request):
                 "CountWatchList": WatchList.objects.filter(userID=request.user.id).count()
             })
         
+        # if startBid <= str(datetime.now()) or endBid <= str(datetime.now()):
+        #      return render(request, "auction")
+
+
         # Insert data that selected from the user to the database class Auction
         auction = Auction.objects.create(
             title=title,
@@ -116,7 +121,7 @@ def createList(request):
         "CountWatchList": WatchList.objects.filter(userID=request.user.id).count()
     })
 
-@login_required(redirect_field_name='index')
+@login_required(login_url='login')
 def categories(request):
     if request.method == "POST":
         category_id = request.POST["allCategories"]
@@ -139,18 +144,19 @@ def categories(request):
         "CountWatchList": WatchList.objects.filter(userID=request.user.id).count()
     })
 
-@login_required(redirect_field_name='index')
+@login_required(login_url='login')
 def watchList(request):
     return render(request, "auctions/watchList.html", {
         "watchList": WatchList.objects.filter(userID=request.user.id).order_by("id")[::-1],
         "CountWatchList": WatchList.objects.filter(userID=request.user.id).count()
     })
 
+@login_required(login_url='login')
 def addWatchList(request, list_id):
     if request.method == "POST":
         # Preventing duplicate list in watchlist with same user
         watchList = WatchList.objects.filter(userID=request.user.id)
-        if WatchList.objects.filter(auctionID=list_id, userID=request.user.id).first() in watchList:
+        if WatchList.objects.get(auctionID=list_id, userID=request.user.id) in watchList:
             messages.warning(request, 'WARNING: This Auction Already in WatchList!')
             return HttpResponseRedirect(reverse("index"))
 
@@ -174,12 +180,14 @@ def addWatchList(request, list_id):
         return HttpResponseRedirect(reverse("watchList"))
 
 # Delete specific WatchList
+@login_required(login_url='login')
 def deleteWatchList(request, list_id):
     delete = WatchList.objects.get(pk=list_id, userID=request.user.id)
     delete.delete()
     return HttpResponseRedirect(reverse("watchList"))
 
 # View details of a listing
+@login_required(login_url='login')
 def view(request, list_id):
     return render(request, "auctions/view.html", {
         "listing": Auction.objects.get(pk=list_id),
@@ -188,6 +196,7 @@ def view(request, list_id):
         "watchList": WatchList.objects.filter(auctionID=list_id, userID=request.user.id)
     })
 
+@login_required(login_url='login')
 def bid(request, list_id):
     if request.method == "POST":
         bid = float(request.POST["bid"])
@@ -223,6 +232,7 @@ def bid(request, list_id):
         newPrice.save()
         return HttpResponseRedirect(reverse("view", args=(list_id,)))
 
+@login_required(login_url='login')
 def comment(request, list_id):
     if request.method == "POST":
 

@@ -78,7 +78,7 @@
         {% endfor %}
         <p style="text-align: center;"><a href="{% url 'index' %}" class="btn btn-secondary">TOP</a></p>
     {% else %}
-        {% for limit in Limit5 %}
+        {% for limit in Limit3 %}
             <div class="mb-3" id="container-active-listing">
                 <div id="img">
                     <a href="{{ limit.image }}" target="_blank"><img src="{{ limit.image }}" class="responsive"></a>

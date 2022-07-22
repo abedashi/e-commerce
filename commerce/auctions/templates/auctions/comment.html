@@ -50,8 +50,10 @@
     {% for comment in comments %}
         <div class="commentList">
             <div class="user-time">
-                <div>
-                    <h3>{{ comment.userID }}</h3>
+                <div class="ss">
+                    <div>
+                        <strong>{{ comment.userID }}: </strong><span style="color: orange;">{% if comment.userID.id == listing.userID.id %}Creator{% endif %}</span>
+                    </div>
                 </div>
                 <div>
                     <span>{{ comment.time }}</span>

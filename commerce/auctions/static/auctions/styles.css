@@ -67,3 +67,7 @@ body {
     flex-direction: column;
     gap: 5px
 }
+.ss {
+    display: flex;
+    text-align: center;
+}

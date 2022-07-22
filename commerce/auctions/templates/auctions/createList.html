@@ -73,11 +73,11 @@
             </div>
         </div>
         <div>
-            From:
+            From: <span style="color: red;">{{ dateerror }}</span>
             <div class="mb-3">
                 <input type="datetime-local" class="form-control" value="{{ startBid }}" name="startBid" required>
             </div>
-            To:
+            To: <span style="color: red;">{{ dateerror }}</span>
             <div class="mb-3">
                 <input type="datetime-local" class="form-control" value="{{ endBid }}" name="endBid" required>
             </div>
