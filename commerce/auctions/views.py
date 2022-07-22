@@ -7,12 +7,13 @@ from django.shortcuts import render
 from django.urls import reverse
 from django.contrib import messages
 
-from .models import User, Auction, Categories, WatchList, Bid
+from .models import User, Auction, Categories, WatchList, Bid, Comment
 
 # @login_required
 def index(request):
     return render(request, "auctions/index.html", {
         "Listings": Auction.objects.all().order_by("id")[::-1],
+        "Limit5": Auction.objects.all().order_by("id")[::-1][:4],
         "CountWatchList": WatchList.objects.filter(userID=request.user.id).count()
     })
 
@@ -35,7 +36,6 @@ def login_view(request):
             })
     else:
         return render(request, "auctions/login.html")
-
 
 def logout_view(request):
     logout(request)
@@ -116,16 +116,19 @@ def createList(request):
         "CountWatchList": WatchList.objects.filter(userID=request.user.id).count()
     })
 
+@login_required(redirect_field_name='index')
 def categories(request):
     if request.method == "POST":
         category_id = request.POST["allCategories"]
+        # Select checking
         if category_id == "Categories":
             return render(request, "auctions/categories.html", {
                 "message": "SELECT CATEGORY",
                 "CATEGORIES": Categories.objects.all(),
                 "CountWatchList": WatchList.objects.filter(userID=request.user.id).count()
             })
-        categoryone = Auction.objects.filter(category_id=Categories.objects.get(categories=category_id))
+        # Open category page 
+        categoryone = Auction.objects.filter(category_id=Categories.objects.get(categories=category_id)).order_by("id")[::-1]
         return render(request, "auctions/category.html", {
             "Categoryone": categoryone,
             "CountWatchList": WatchList.objects.filter(userID=request.user.id).count()
@@ -136,26 +139,22 @@ def categories(request):
         "CountWatchList": WatchList.objects.filter(userID=request.user.id).count()
     })
 
+@login_required(redirect_field_name='index')
 def watchList(request):
     return render(request, "auctions/watchList.html", {
         "watchList": WatchList.objects.filter(userID=request.user.id).order_by("id")[::-1],
         "CountWatchList": WatchList.objects.filter(userID=request.user.id).count()
     })
 
-def viewWatchList(request, list_id):
-    return render(request, "auctions/viewWatchList.html", {
-        "listing": WatchList.objects.get(pk=list_id, userID=request.user.id),
-        "countBid": Bid.objects.filter(auctionID=list_id).count(),
-        "CountWatchList": WatchList.objects.filter(userID=request.user.id).count()
-    })
-
 def addWatchList(request, list_id):
     if request.method == "POST":
+        # Preventing duplicate list in watchlist with same user
         watchList = WatchList.objects.filter(userID=request.user.id)
         if WatchList.objects.filter(auctionID=list_id, userID=request.user.id).first() in watchList:
             messages.warning(request, 'WARNING: This Auction Already in WatchList!')
             return HttpResponseRedirect(reverse("index"))
 
+        # Create new watchlist row by inserting data same as from auction in a specific id 
         auction = Auction.objects.get(pk=list_id)
         watch = WatchList.objects.create(
             title=auction.title,
@@ -170,19 +169,23 @@ def addWatchList(request, list_id):
             userID=User.objects.get(pk=request.user.id)
         )
         watch.save()
+
         messages.success(request, 'Auction added to WatchList Successfully.')
         return HttpResponseRedirect(reverse("watchList"))
 
+# Delete specific WatchList
 def deleteWatchList(request, list_id):
     delete = WatchList.objects.get(pk=list_id, userID=request.user.id)
     delete.delete()
     return HttpResponseRedirect(reverse("watchList"))
 
+# View details of a listing
 def view(request, list_id):
     return render(request, "auctions/view.html", {
         "listing": Auction.objects.get(pk=list_id),
         "countBid": Bid.objects.filter(auctionID=list_id).count(),
-        "CountWatchList": WatchList.objects.filter(userID=request.user.id).count()
+        "CountWatchList": WatchList.objects.filter(userID=request.user.id).count(),
+        "watchList": WatchList.objects.filter(auctionID=list_id, userID=request.user.id)
     })
 
 def bid(request, list_id):
@@ -192,19 +195,26 @@ def bid(request, list_id):
         if not bid:
             return render(request, "auctions/view.html")
 
+        # Check price for biding
         updateBidAuction = Auction.objects.get(pk=list_id)
         updateBidWatchList = WatchList.objects.filter(auctionID=Auction.objects.get(pk=list_id))
         if bid <= updateBidAuction.price:
             messages.warning(request, 'WARNING: Bid Must be greater than old price')
             return HttpResponseRedirect(reverse("view", args=(list_id,)))
 
+        # Iterate through updateBidWatchlist to update all the watchlist price that are biding
         for row in updateBidWatchList:
+            if bid <= row.price:
+                messages.warning(request, 'WARNING: Bid Must be greater than old price')
+                return HttpResponseRedirect(reverse("viewWatchList"))
             row.price = bid
             row.save()
 
+        # update auction price
         updateBidAuction.price = bid
         updateBidAuction.save()
 
+        # Create new row in Bid model
         newPrice = Bid.objects.create(
             price=bid,
             userID=User.objects.get(pk=request.user.id),
@@ -213,35 +223,23 @@ def bid(request, list_id):
         newPrice.save()
         return HttpResponseRedirect(reverse("view", args=(list_id,)))
 
-def watchListBid(request, list_id):
+def comment(request, list_id):
     if request.method == "POST":
-        bid = float(request.POST["bid"])
 
-        if not bid:
-            return render(request, "auctions/viewWatchList.html")
-
-        updateBidWatchList = WatchList.objects.filter(auctionID=list_id)
-        updateBidAuction = Auction.objects.get(pk=list_id)
-
-        for row in updateBidWatchList:
-            if bid <= row.price:
-                messages.warning(request, 'WARNING: Bid Must be greater than old price')
-                return HttpResponseRedirect(reverse("viewWatchList", args=(list_id,)))
-            row.price = bid
-            row.save()
-
-        updateBidAuction.price = bid
-        updateBidAuction.save()
-
-        newPrice = Bid.objects.create(
-            price=bid,
-            userID=User.objects.get(pk=request.user.id),
-            auctionID=Auction.objects.get(pk=list_id)
+        comment = request.POST["comment"]
+        if not comment:
+            messages.warning(request, 'Place a Comment.')
+            return HttpResponseRedirect(reverse("index"))
+        
+        commentRow = Comment.objects.create(
+            comment=comment,
+            auctionID=Auction.objects.get(pk=list_id),
+            userID=User.objects.get(pk=request.user.id)
         )
-        newPrice.save()
-        return HttpResponseRedirect(reverse("viewWatchList", args=(list_id,)))
-
-# def count(request):
-#     return render(request, "auctions/index.html", {
-#         "CountWatchList": WatchList.objects.filter(userID=request.user.id).count()
-#     })
+        commentRow.save()
+        
+    return render(request, "auctions/comment.html", {
+        "listing": Auction.objects.get(pk=list_id),
+        "comments": Comment.objects.filter(auctionID=list_id).order_by("id")[::-1],
+        "CountWatchList": WatchList.objects.filter(userID=request.user.id).count()
+    })

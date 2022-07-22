@@ -2,7 +2,6 @@
 
 {% block body %}
 
-</div>
 <ul class="nav">
     <li class="nav-item">
         <a class="nav-link" href="{% url 'index' %}">Active Listings</a>
@@ -39,6 +38,10 @@
     {% endif %}
 
     <h1>Listing: {{ listing.title }}</h1>
+    {% if watchList %}
+    <span style="border: 1px solid gray; padding-left: 3px; padding-right: 3px; background-color: gray; color: white; border-radius: 5px;">WatchList</span>
+    <br>
+    {% endif %}
     <a href="{{ listing.image }}" target="_blank"><img src="{{ listing.image }}" height="400"></a>
     <p>{{ listing.description }}</p>
     <h2>${{ listing.price }}</h2>
@@ -48,7 +51,7 @@
         <div class="mb-3">
             <input type="text" class="form-control" name="bid" placeholder="Bid" autocomplete="off" required>
         </div>
-        <input type="submit" class="btn btn-primary">
+        <input type="submit" class="btn btn-primary" value="Place Bid">
     </form>
     <div style="margin-top: 10px;">
         <h4>Details</h4>

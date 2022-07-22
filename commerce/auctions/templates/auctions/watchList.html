@@ -1,7 +1,6 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-</div>
 <ul class="nav">
     <li class="nav-item">
         <a class="nav-link" href="{% url 'index' %}">Active Listings</a>
@@ -72,7 +71,8 @@
                 </div>
                 <div style="margin-top: 5px; display: flex; gap: 5px;">
                     <form>
-                        <a href="{% url 'viewWatchList' listing.id %}" class="btn btn-secondary">View</a>
+                        <a href="{% url 'view' listing.auctionID_id %}" class="btn btn-secondary">View</a>
+                        <a href="{% url 'comment' listing.auctionID.id %}" class="btn btn-secondary">Comment</a>
                     </form>
                 </div>
             </div>

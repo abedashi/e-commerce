@@ -50,3 +50,20 @@ body {
     font-size: x-large;
     color: red;
 }
+.user-time {
+    display: flex;
+    justify-content: space-between;
+}
+.commentList {
+    border: 1px solid rgb(212, 212, 212);
+    border-radius: 5px;
+    padding: 10px;
+}
+.comment {
+    padding-left: 15px;
+}
+.containerComment {
+    display: flex;
+    flex-direction: column;
+    gap: 5px
+}

@@ -1,0 +1,66 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <ul class="nav">
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'index' %}">Active Listings</a>
+        </li>
+        {% if user.is_authenticated %}
+            <li>
+                <a class="nav-link" href="{% url 'categories' %}">Categories</a>
+            </li>
+            <li>
+                <a class="nav-link" href="{% url 'watchList' %}">WatchList {% if CountWatchList > 0 %}<span style="border: 1px solid gray; padding-left: 3px; padding-right: 3px; background-color: gray; color: white; border-radius: 5px;">{{ CountWatchList }}</span>{% endif %}</a>
+            </li>
+            <li>
+                <a class="nav-link" href="{% url 'createList' %}">Create Listing</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
+            </li>
+        {% else %}
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'login' %}">Log In</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'register' %}">Register</a>
+            </li>
+        {% endif %}
+    </ul>
+    <hr>
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-dismissible alert-warning">
+                <strong>{{message}}</strong>
+            </div>
+        {% endfor %}
+    {% endif %}
+    <h2>Comment List for: {{ listing.title }}</h2>
+    <div>
+        <form action="{% url 'comment' listing.id %}" method="post">
+            {% csrf_token %}
+            <div class="mb-3">
+                <textarea class="form-control" name="comment" placeholder="Comment" autocomplete="off" required></textarea>
+            </div>
+            <input type="submit" class="btn btn-secondary" value="Comment">
+        </form>
+    </div>
+    <hr>
+    <div class="containerComment">
+    {% for comment in comments %}
+        <div class="commentList">
+            <div class="user-time">
+                <div>
+                    <h3>{{ comment.userID }}</h3>
+                </div>
+                <div>
+                    <span>{{ comment.time }}</span>
+                </div>
+            </div>
+            <div class="comment">
+                <p>{{ comment.comment }}</p>
+            </div>
+        </div>
+    {% endfor %}
+    </div>
+{% endblock %}
