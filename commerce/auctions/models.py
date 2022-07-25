@@ -15,22 +15,23 @@ class Auction(models.Model):
     title = models.CharField(max_length=40)
     description = models.CharField(max_length=1000)
     created_at = models.DateTimeField(default=timezone.now)
-    image = models.URLField(max_length=400)
+    image = models.ImageField(null=True, blank=True)
     price = models.FloatField()
     startBid = models.DateTimeField(auto_now=False, auto_now_add=False)
     endBid = models.DateTimeField(auto_now=False, auto_now_add=False)
     userID = models.ForeignKey(User, on_delete=models.CASCADE, related_name="buyer", null=True)
     category_id = models.ForeignKey(Categories, on_delete=models.CASCADE, related_name="categoryId", null=True)
-    # watchList = models.BooleanField(default=False)
+    close = models.BooleanField(default=False)
+    winner = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
-        return f"{self.title}, {self.description}, {self.category_id}"
+        return f"({self.title}, {self.description}, {self.category_id})"
 
 class WatchList(models.Model):
     title = models.CharField(max_length=40)
     description = models.CharField(max_length=1000)
     created_at = models.DateTimeField(default=timezone.now)
-    image = models.URLField(max_length=400)
+    image = models.ImageField(null=True, blank=True)
     price = models.FloatField()
     startBid = models.DateTimeField(auto_now=False, auto_now_add=False)
     endBid = models.DateTimeField(auto_now=False, auto_now_add=False)
@@ -38,10 +39,13 @@ class WatchList(models.Model):
     category_id = models.ForeignKey(Categories, on_delete=models.CASCADE, null=True)
     auctionID = models.ForeignKey(Auction, on_delete=models.CASCADE, null=True)
 
+    def __str__(self):
+        return f"{self.id}, {self.auctionID}, {self.userID}"
+
 class Bid(models.Model):
     price = models.FloatField()
-    userID = models.ForeignKey(User, on_delete=models.CASCADE)
-    auctionID = models.ForeignKey(Auction, on_delete=models.CASCADE)
+    userID = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
+    auctionID = models.ForeignKey(Auction, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return f"{self.id}, {self.userID}, {self.auctionID}"

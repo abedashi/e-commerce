@@ -16,33 +16,6 @@
                 Not signed in.
             {% endif %}
         </div>
-        <!-- <ul class="nav">
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'index' %}">Active Listings</a>
-            </li>
-            {% if user.is_authenticated %}
-                <li>
-                    <a class="nav-link" href="{% url 'categories' %}">Categories</a>
-                </li>
-                <li>
-                    <a class="nav-link" href="{% url 'watchList' %}">WatchList <span style="border: 1px solid gray; padding-left: 3px; padding-right: 3px; background-color: gray; color: white; border-radius: 5px;">2</span></a>
-                </li>
-                <li>
-                    <a class="nav-link" href="{% url 'createList' %}">Create Listing</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
-                </li>
-            {% else %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'login' %}">Log In</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'register' %}">Register</a>
-                </li>
-            {% endif %}
-        </ul>
-        <hr> -->
         {% block body %}
         {% endblock %}
     </body>

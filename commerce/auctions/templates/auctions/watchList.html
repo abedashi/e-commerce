@@ -1,33 +1,32 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-<ul class="nav">
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'index' %}">Active Listings</a>
-    </li>
+    <ul class="nav">
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'index' %}">Active Listings</a>
+        </li>
     {% if user.is_authenticated %}
-        <li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'myAuctions' %}">My Auctions</a>
+        </li>
+        <li class="nav-item">
             <a class="nav-link" href="{% url 'categories' %}">Categories</a>
         </li>
-        <li>
+        <li class="nav-item">
             <a class="nav-link" href="{% url 'watchList' %}">WatchList {% if CountWatchList > 0 %}<span style="border: 1px solid gray; padding-left: 3px; padding-right: 3px; background-color: gray; color: white; border-radius: 5px;">{{ CountWatchList }}</span>{% endif %}</a>
         </li>
-        <li>
+        <li class="nav-item">
             <a class="nav-link" href="{% url 'createList' %}">Create Listing</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'winner' %}">Closed Auctions</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
         </li>
-    {% else %}
-        <li class="nav-item">
-            <a class="nav-link" href="{% url 'login' %}">Log In</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="{% url 'register' %}">Register</a>
-        </li>
     {% endif %}
-</ul>
-<hr>
+    </ul>
+    <hr>
     <h2>WatchList</h2>
 
     {% if messages %}
@@ -47,7 +46,7 @@
     {% for listing in watchList %}
         <div class="mb-3" id="container-active-listing">
             <div id="img">
-                <a href="{{ listing.image }}" target="_blank"><img src="{{ listing.image }}" class="responsive"></a>
+                <a href="images/{{ listing.image }}" target="_blank"><img src="images/{{ listing.image }}" class="responsive"></a>
             </div>
             <div class="mb-3" id="details">
                 <div class="delete">
@@ -55,9 +54,12 @@
                         <h4>{{ listing.title }}</h3>
                     </div>
                     <div>
-                        <a href="{% url 'deleteWatchList' listing.id %}"><ion-icon name="trash-outline" class="deleteIcon"></ion-icon></a>
-                        <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
-                        <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+                        <form action="{% url 'delete' listing.id %}" method="post">
+                            {% csrf_token %}
+                            <button style="border: none; background-color: white" type="submit" name="delete_watchList"><ion-icon name="trash-outline" class="deleteIcon"></ion-icon></button>
+                            <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+                            <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+                        </form>
                     </div>
                 </div>
                 <div>
@@ -69,12 +71,16 @@
                 <div>
                     Created {{ listing.created_at }}
                 </div>
+                {% if listing.auctionID.close == False %}
                 <div style="margin-top: 5px; display: flex; gap: 5px;">
-                    <form>
-                        <a href="{% url 'view' listing.auctionID_id %}" class="btn btn-secondary">View</a>
-                        <a href="{% url 'comment' listing.auctionID.id %}" class="btn btn-secondary">Comment</a>
-                    </form>
+                    <a href="{% url 'view' listing.auctionID_id %}" class="btn btn-secondary">View</a>
+                    <a href="{% url 'comment' listing.auctionID.id %}" class="btn btn-secondary">Comment</a>
                 </div>
+                {% else %}
+                <div>
+                    SOLD OUT
+                </div>
+                {% endif %}
             </div>
         </div>
     {% endfor %}

@@ -1,0 +1,81 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <ul class="nav">
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'index' %}">Active Listings</a>
+        </li>
+    {% if user.is_authenticated %}
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'myAuctions' %}">My Auctions</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'categories' %}">Categories</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'watchList' %}">WatchList {% if CountWatchList > 0 %}<span style="border: 1px solid gray; padding-left: 3px; padding-right: 3px; background-color: gray; color: white; border-radius: 5px;">{{ CountWatchList }}</span>{% endif %}</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'createList' %}">Create Listing</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'winner' %}">Closed Auctions</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
+        </li>
+    {% endif %}
+    </ul>
+    <hr>
+<h2>Finished Lists</h2>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-dismissible alert-warning">
+            <strong>{{message}}</strong>
+        </div>
+    {% endfor %}
+{% endif %}
+
+{% if not winner %}
+    <div style="text-align: center;">
+        No Auction Closed to Announce The Winner
+    </div>
+{% endif %}
+
+{% for listing in winner %}
+    <div class="mb-3" id="container-active-listing">
+        <div id="img">
+            <a href="/images/{{ listing.image }}" target="_blank"><img src="/images/{{ listing.image }}" class="responsive"></a>
+        </div>
+        <div class="mb-3" id="details">
+            <div class="delete">
+                <div>
+                    <h4>{{ listing.title }}</h3>
+                </div>
+                <div>
+                    {% if listing.userID == request.user %}
+                    <form action="{% url 'delete' listing.id %}" method="post">
+                        {% csrf_token %}
+                        <button style="border: none; background-color: white" type="submit" name="delete-Winner-Auction"><ion-icon name="trash-outline" class="deleteIcon"></ion-icon></button>
+                        <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
+                        <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+                    </form>
+                    {% endif %}
+                </div>
+            </div>
+            <div>
+                {% if listing.winner is None %}
+                    No One Wins This Auction 
+                {% else %}
+                    {{ listing.winner }} Won with price ${{ listing.price }} 
+                {% endif %}
+            </div>
+            <div style="margin-top: 5px; display: flex; gap: 5px;">
+                <a href="{% url 'view' listing.id %}" class="btn btn-secondary">View</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+
+{% endblock %}

@@ -1,33 +1,39 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-<ul class="nav">
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'index' %}">Active Listings</a>
-    </li>
-    {% if user.is_authenticated %}
-        <li>
-            <a class="nav-link" href="{% url 'categories' %}">Categories</a>
-        </li>
-        <li>
-            <a class="nav-link" href="{% url 'watchList' %}">WatchList {% if CountWatchList > 0 %}<span style="border: 1px solid gray; padding-left: 3px; padding-right: 3px; background-color: gray; color: white; border-radius: 5px;">{{ CountWatchList }}</span>{% endif %}</a>
-        </li>
-        <li>
-            <a class="nav-link" href="{% url 'createList' %}">Create Listing</a>
-        </li>
+    <ul class="nav">
         <li class="nav-item">
-            <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
+            <a class="nav-link" href="{% url 'index' %}">Active Listings</a>
         </li>
-    {% else %}
-        <li class="nav-item">
-            <a class="nav-link" href="{% url 'login' %}">Log In</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="{% url 'register' %}">Register</a>
-        </li>
-    {% endif %}
-</ul>
-<hr>
+        {% if user.is_authenticated %}
+            <li class="nac-item">
+                <a class="nav-link" href="{% url 'myAuctions' %}">My Auctions</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'categories' %}">Categories</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'watchList' %}">WatchList {% if CountWatchList > 0 %}<span style="border: 1px solid gray; padding-left: 3px; padding-right: 3px; background-color: gray; color: white; border-radius: 5px;">{{ CountWatchList }}</span>{% endif %}</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'createList' %}">Create Listing</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'winner' %}">Closed Auctions</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
+            </li>
+        {% else %}
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'login' %}">Log In</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'register' %}">Register</a>
+            </li>
+        {% endif %}
+    </ul>
+    <hr>
     <h2>Active Listings</h2>
     
     {% if messages %}
@@ -38,17 +44,18 @@
         {% endfor %}
     {% endif %}
 
-    {% if not Listings %}
-        <div style="text-align: center;">
-            No Auctions in Active Listings
-        </div>
-    {% endif %}
-
     {% if user.is_authenticated %}
+
+        {% if not Listings %}
+            <div style="text-align: center;">
+                No Auctions in Active Listings
+            </div>
+        {% endif %}
+        
         {% for listing in Listings %}
             <div class="mb-3" id="container-active-listing">
                 <div id="img">
-                    <a href="{{ listing.image }}" target="_blank"><img src="{{ listing.image }}" class="responsive"></a>
+                    <a href="/images/{{ listing.image }}" target="_blank"><img src="/images/{{ listing.image }}" class="responsive"></a>
                 </div>
                 <div class="mb-3" id="details">
                     <div>
@@ -66,22 +73,23 @@
                     <div style="margin-top: 5px; display: flex; gap: 5px;">
                             <a href="{% url 'view' listing.id %}" class="btn btn-secondary">View</a>
                             <a href="{% url 'comment' listing.id %}" class="btn btn-secondary">Comment</a>
+                            {% if not listing.userID == request.user %}
                             <form action="{% url 'addWatchList' listing.id %}" method="post">
                                 {% csrf_token %}
                                 <button type="submit" class="btn btn-primary" style="display: flex; align-items: center;"><ion-icon style="font-size: 20px;" name="add-outline"></ion-icon>Add to Watchlist</button>
                             </form>
                             <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
                             <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
+                            {% endif %}
                     </div>
                 </div>
             </div>
         {% endfor %}
-        <p style="text-align: center;"><a href="{% url 'index' %}" class="btn btn-secondary">TOP</a></p>
     {% else %}
-        {% for limit in Limit3 %}
+        {% for limit in Limit2 %}
             <div class="mb-3" id="container-active-listing">
                 <div id="img">
-                    <a href="{{ limit.image }}" target="_blank"><img src="{{ limit.image }}" class="responsive"></a>
+                    <a href="/images/{{ limit.image }}" target="_blank"><img src="/images/{{ limit.image }}" class="responsive"></a>
                 </div>
                 <div class="mb-3" id="details">
                     <div>

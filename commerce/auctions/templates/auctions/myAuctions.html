@@ -1,0 +1,71 @@
+{% extends "auctions/layout.html" %}
+
+{% block body %}
+    <ul class="nav">
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'index' %}">Active Listings</a>
+        </li>
+    {% if user.is_authenticated %}
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'myAuctions' %}">My Auctions</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'categories' %}">Categories</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'watchList' %}">WatchList {% if CountWatchList > 0 %}<span style="border: 1px solid gray; padding-left: 3px; padding-right: 3px; background-color: gray; color: white; border-radius: 5px;">{{ CountWatchList }}</span>{% endif %}</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'createList' %}">Create Listing</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'winner' %}">Closed Auctions</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
+        </li>
+    {% endif %}
+    </ul>
+    <hr>
+    <h2>My Auctions Listing</h2>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-dismissible alert-warning">
+                <strong>{{message}}</strong>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% if not myAuctions %}
+        <div style="text-align: center;">
+            No Auctions in You Posted
+        </div>
+    {% endif %}
+    {% for listing in myAuctions %}
+    <div class="mb-3" id="container-active-listing">
+        <div id="img">
+            <a href="/images/{{ listing.image }}" target="_blank"><img src="/images/{{ listing.image }}" class="responsive"></a>
+        </div>
+        <div class="mb-3" id="details">
+            <div>
+                <h4>{{ listing.title }}</h3>
+            </div>
+            <div>
+                <h5>Price: ${{ listing.price }}</h4>
+            </div>
+            <div>
+                <h6>{{ listing.description }}</h6>
+            </div>
+            <div>
+                <span style="color: green;">Start: {{ listing.startBid }}</span>   <span style="color: red;">End: {{ listing.endBid }}</span>
+            </div>
+            <div style="margin-top: 5px; display: flex; gap: 5px;">
+                    <a href="{% url 'view' listing.id %}" class="btn btn-secondary">View</a>
+                    <a href="{% url 'comment' listing.id %}" class="btn btn-secondary">Comment</a>
+                    <a href="{% url 'closeAuction' listing.id %}" class="btn btn-danger">Close Auction</a>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+{% endblock %}

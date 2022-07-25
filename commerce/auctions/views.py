@@ -1,7 +1,7 @@
-from datetime import datetime, timezone
+from datetime import datetime
 from django.contrib.auth import authenticate, login, logout
 from django.db import IntegrityError
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponseRedirect
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import render
 from django.urls import reverse
@@ -11,8 +11,8 @@ from .models import User, Auction, Categories, WatchList, Bid, Comment
 
 def index(request):
     return render(request, "auctions/index.html", {
-        "Listings": Auction.objects.all().order_by("id")[::-1],
-        "Limit3": Auction.objects.all().order_by("id")[::-1][:3],
+        "Listings": Auction.objects.filter(close=False).order_by("id")[::-1],
+        "Limit2": Auction.objects.filter(close=False).order_by("id")[::-1][:2],
         "CountWatchList": WatchList.objects.filter(userID=request.user.id).count()
     })
 
@@ -82,23 +82,30 @@ def createList(request):
         endBid = request.POST["endBid"]
 
         # Check for category if selected or gives a message and more security
-        if not title or not description or not image or not startPrice or category == "Categories" or not startBid or not endBid or startBid <= str(datetime.now()) or endBid <= str(datetime.now()) or startBid <= endBid:
+        if not title or not description or not image or not startPrice or category == "Categories" or not startBid or not endBid:
             return render(request, "auctions/createList.html", {
                 "message": "Select a Category",
                 "dateerror": "date error",
                 "CATEGORIES": Categories.objects.all(),
                 "title": title,
                 "description": description,
-                "image": image,
                 "startPrice": startPrice,
                 "category": category,
                 "startBid": startBid,
                 "endBid": endBid,
                 "CountWatchList": WatchList.objects.filter(userID=request.user.id).count()
             })
-        
-        # if startBid <= str(datetime.now()) or endBid <= str(datetime.now()):
-        #      return render(request, "auction")
+
+        if startBid < str(datetime.now()) or endBid <= str(datetime.now()) or startBid >= endBid:
+             return render(request, "auctions/createList.html", {
+                "dateError": "date error",
+                "CATEGORIES": Categories.objects.all(),
+                "title": title,
+                "description": description,
+                "startPrice": startPrice,
+                "category": category,
+                "CountWatchList": WatchList.objects.filter(userID=request.user.id).count()
+            })
 
 
         # Insert data that selected from the user to the database class Auction
@@ -133,7 +140,7 @@ def categories(request):
                 "CountWatchList": WatchList.objects.filter(userID=request.user.id).count()
             })
         # Open category page 
-        categoryone = Auction.objects.filter(category_id=Categories.objects.get(categories=category_id)).order_by("id")[::-1]
+        categoryone = Auction.objects.filter(category_id=Categories.objects.get(categories=category_id), close=False).order_by("id")[::-1]
         return render(request, "auctions/category.html", {
             "Categoryone": categoryone,
             "CountWatchList": WatchList.objects.filter(userID=request.user.id).count()
@@ -156,7 +163,7 @@ def addWatchList(request, list_id):
     if request.method == "POST":
         # Preventing duplicate list in watchlist with same user
         watchList = WatchList.objects.filter(userID=request.user.id)
-        if WatchList.objects.get(auctionID=list_id, userID=request.user.id) in watchList:
+        if WatchList.objects.filter(auctionID=list_id, userID=request.user.id).first() in watchList:
             messages.warning(request, 'WARNING: This Auction Already in WatchList!')
             return HttpResponseRedirect(reverse("index"))
 
@@ -181,10 +188,17 @@ def addWatchList(request, list_id):
 
 # Delete specific WatchList
 @login_required(login_url='login')
-def deleteWatchList(request, list_id):
-    delete = WatchList.objects.get(pk=list_id, userID=request.user.id)
-    delete.delete()
-    return HttpResponseRedirect(reverse("watchList"))
+def delete(request, list_id):
+    if request.method == "POST":
+        if 'delete_watchList' in request.POST:
+            delete = WatchList.objects.get(pk=list_id, userID=request.user.id)
+            delete.delete()
+            return HttpResponseRedirect(reverse("watchList"))
+
+        elif 'delete-Winner-Auction' in request.POST:
+            selectedAuction = Auction.objects.get(pk=list_id)
+            selectedAuction.delete()
+            return HttpResponseRedirect(reverse("winner"))
 
 # View details of a listing
 @login_required(login_url='login')
@@ -251,5 +265,38 @@ def comment(request, list_id):
     return render(request, "auctions/comment.html", {
         "listing": Auction.objects.get(pk=list_id),
         "comments": Comment.objects.filter(auctionID=list_id).order_by("id")[::-1],
+        "CountWatchList": WatchList.objects.filter(userID=request.user.id).count()
+    })
+
+@login_required(login_url='login')
+def myAuctions(request):
+    return render(request, "auctions/myAuctions.html", {
+        "myAuctions": Auction.objects.filter(userID=request.user.id, close=False),
+        "CountWatchList": WatchList.objects.filter(userID=request.user.id).count()
+    })
+
+def closeAuction(request, list_id):
+    myAuctionSelected = Auction.objects.get(pk=list_id)
+
+    bids = Bid.objects.all()
+    if not Bid.objects.filter(auctionID=list_id, price=myAuctionSelected.price).first() in bids:
+        myAuctionSelected.close = True
+        myAuctionSelected.save()
+
+        messages.warning(request, 'No One Wins This Auction')
+        return HttpResponseRedirect(reverse("myAuctions"))
+
+    # Auction update close to True and update winner 
+    usernameOfHighestBid = Bid.objects.get(auctionID=list_id, price=myAuctionSelected.price)
+    myAuctionSelected.close = True
+    myAuctionSelected.winner = User.objects.get(pk=usernameOfHighestBid.userID.id)
+    myAuctionSelected.save()
+
+    messages.warning(request, 'Check Who is the Winner')
+    return HttpResponseRedirect(reverse("myAuctions"))
+    
+def winner(request):
+    return render(request, "auctions/winner.html", {
+        "winner": Auction.objects.filter(close=True).order_by("id")[::-1],
         "CountWatchList": WatchList.objects.filter(userID=request.user.id).count()
     })

@@ -5,33 +5,32 @@
 {% endblock %}
 
 {% block body %}
-<ul class="nav">
-    <li class="nav-item">
-        <a class="nav-link" href="{% url 'index' %}">Active Listings</a>
-    </li>
+    <ul class="nav">
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'index' %}">Active Listings</a>
+        </li>
     {% if user.is_authenticated %}
-        <li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'myAuctions' %}">My Auctions</a>
+        </li>
+        <li class="nav-item">
             <a class="nav-link" href="{% url 'categories' %}">Categories</a>
         </li>
-        <li>
+        <li class="nav-item">
             <a class="nav-link" href="{% url 'watchList' %}">WatchList {% if CountWatchList > 0 %}<span style="border: 1px solid gray; padding-left: 3px; padding-right: 3px; background-color: gray; color: white; border-radius: 5px;">{{ CountWatchList }}</span>{% endif %}</a>
         </li>
-        <li>
+        <li class="nav-item">
             <a class="nav-link" href="{% url 'createList' %}">Create Listing</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'winner' %}">Closed Auctions</a>
         </li>
         <li class="nav-item">
             <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
         </li>
-    {% else %}
-        <li class="nav-item">
-            <a class="nav-link" href="{% url 'login' %}">Log In</a>
-        </li>
-        <li class="nav-item">
-            <a class="nav-link" href="{% url 'register' %}">Register</a>
-        </li>
     {% endif %}
-</ul>
-<hr>
+    </ul>
+    <hr>
     <h2>Create List</h2>
     {% if messages %}
         {% for message in messages %}
@@ -46,13 +45,13 @@
             {% csrf_token %}
             <div class="left">
                 <div class="mb-3">
-                    <input type="text" class="form-control" value="{{ title }}" name="title" placeholder="Title" autocomplete="off" {% if not message %}autofocus{% endif %} required>
+                    <input type="text" class="form-control" value="{{ title }}" name="title" placeholder="Title" autocomplete="off" {% if not message and not dateError %}autofocus{% endif %} required>
                 </div>
                 <div class="mb-3">
                     <input type="text" class="form-control" value="{{ description }}" name="description" placeholder="description" autocomplete="off" required>
                 </div>
                 <div class="mb-3">
-                    <input type="url" class="form-control" value="{{ image }}" name="url" placeholder="Image URL" autocomplete="off" required>
+                    <input type="file" name="url" required>
                 </div>
             </div>
             <div class="right">
@@ -73,11 +72,11 @@
             </div>
         </div>
         <div>
-            From: <span style="color: red;">{{ dateerror }}</span>
+            From: <span style="color: red;">{{ dateError }}</span>
             <div class="mb-3">
-                <input type="datetime-local" class="form-control" value="{{ startBid }}" name="startBid" required>
+                <input type="datetime-local" class="form-control" value="{{ startBid }}" {% if dateError %}autofocus{% endif %} name="startBid" required>
             </div>
-            To: <span style="color: red;">{{ dateerror }}</span>
+            To: <span style="color: red;">{{ dateError }}</span>
             <div class="mb-3">
                 <input type="datetime-local" class="form-control" value="{{ endBid }}" name="endBid" required>
             </div>
