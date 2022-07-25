@@ -16,7 +16,6 @@ def index(request):
         "CountWatchList": WatchList.objects.filter(userID=request.user.id).count()
     })
 
-
 def login_view(request):
     if request.method == "POST":
 
@@ -40,7 +39,6 @@ def login_view(request):
 def logout_view(request):
     logout(request)
     return HttpResponseRedirect(reverse("index"))
-
 
 def register(request):
     if request.method == "POST":
@@ -106,7 +104,6 @@ def createList(request):
                 "category": category,
                 "CountWatchList": WatchList.objects.filter(userID=request.user.id).count()
             })
-
 
         # Insert data that selected from the user to the database class Auction
         auction = Auction.objects.create(
@@ -190,11 +187,13 @@ def addWatchList(request, list_id):
 @login_required(login_url='login')
 def delete(request, list_id):
     if request.method == "POST":
+        # Delete a watchlist
         if 'delete_watchList' in request.POST:
             delete = WatchList.objects.get(pk=list_id, userID=request.user.id)
             delete.delete()
             return HttpResponseRedirect(reverse("watchList"))
 
+        # Delete closed auction from his/her owner
         elif 'delete-Winner-Auction' in request.POST:
             selectedAuction = Auction.objects.get(pk=list_id)
             selectedAuction.delete()
@@ -250,11 +249,13 @@ def bid(request, list_id):
 def comment(request, list_id):
     if request.method == "POST":
 
+        # Attempt to sign user in
         comment = request.POST["comment"]
         if not comment:
             messages.warning(request, 'Place a Comment.')
             return HttpResponseRedirect(reverse("index"))
         
+        # Insert comment fields
         commentRow = Comment.objects.create(
             comment=comment,
             auctionID=Auction.objects.get(pk=list_id),
@@ -275,9 +276,10 @@ def myAuctions(request):
         "CountWatchList": WatchList.objects.filter(userID=request.user.id).count()
     })
 
+@login_required(login_url='login')
 def closeAuction(request, list_id):
+    # checking if this auction have been bidded from any user
     myAuctionSelected = Auction.objects.get(pk=list_id)
-
     bids = Bid.objects.all()
     if not Bid.objects.filter(auctionID=list_id, price=myAuctionSelected.price).first() in bids:
         myAuctionSelected.close = True
@@ -292,9 +294,11 @@ def closeAuction(request, list_id):
     myAuctionSelected.winner = User.objects.get(pk=usernameOfHighestBid.userID.id)
     myAuctionSelected.save()
 
+    # announcement to check the winner
     messages.warning(request, 'Check Who is the Winner')
     return HttpResponseRedirect(reverse("myAuctions"))
     
+@login_required(login_url='login')
 def winner(request):
     return render(request, "auctions/winner.html", {
         "winner": Auction.objects.filter(close=True).order_by("id")[::-1],
