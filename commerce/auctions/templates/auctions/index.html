@@ -48,7 +48,7 @@
 
         {% if not Listings %}
             <div style="text-align: center;">
-                No Auctions in Active Listings
+                No Auctions in Active Listings. <a href="{% url 'createList' %}">Create One</a>
             </div>
         {% endif %}
         

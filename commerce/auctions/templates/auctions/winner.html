@@ -57,7 +57,7 @@
                     {% if listing.userID == request.user %}
                     <form action="{% url 'delete' listing.id %}" method="post">
                         {% csrf_token %}
-                        <button style="border: none; background-color: white" type="submit" name="delete-Winner-Auction"><ion-icon name="trash-outline" class="deleteIcon"></ion-icon></button>
+                        <button style="border: none; background-color: white; outline: white;" type="submit" name="delete-Winner-Auction"><ion-icon name="trash-outline" class="deleteIcon"></ion-icon></button>
                         <script type="module" src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js"></script>
                         <script nomodule src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js"></script>
                     </form>
